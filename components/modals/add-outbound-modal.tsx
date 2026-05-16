@@ -117,9 +117,9 @@ export function AddOutboundModal({ open, onClose, onSuccess }: AddOutboundModalP
     }
   }
 
-  const handleQtyChange = (index: number, qty: number) => {
+  const handleQtyChange = (index: number, qty: number | string) => {
     const newItems = [...lineItems]
-    newItems[index].qty = qty
+    newItems[index].qty = typeof qty === 'string' ? 0 : qty
     setLineItems(newItems)
   }
 
