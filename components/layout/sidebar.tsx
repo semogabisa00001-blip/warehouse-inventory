@@ -15,7 +15,8 @@ import {
   Box,
   Tag,
   Truck,
-  MapPin
+  MapPin,
+  X
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
@@ -73,7 +74,12 @@ const adminMenuItems = [
   },
 ]
 
-export function Sidebar() {
+interface SidebarProps {
+  isOpen: boolean
+  onClose: () => void
+}
+
+export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
@@ -117,87 +123,190 @@ export function Sidebar() {
   }
 
   return (
-    <div className="flex h-screen w-64 flex-col bg-white border-r">
-      {/* Logo */}
-      <div className="flex h-16 items-center border-b px-6">
-        <div className="flex items-center space-x-2">
-          <div className="bg-green-600 p-2 rounded-lg">
-            <Warehouse className="h-6 w-6 text-white" />
+    <>
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:flex h-screen w-64 flex-col bg-white border-r">
+        {/* Logo */}
+        <div className="flex h-16 items-center border-b px-6">
+          <div className="flex items-center space-x-2">
+            <div className="bg-green-600 p-2 rounded-lg">
+              <Warehouse className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-gray-900">Mini Warehouse</h1>
+              <p className="text-xs text-gray-500">Inventory System</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-lg font-bold text-gray-900">Mini Warehouse</h1>
-            <p className="text-xs text-gray-500">Inventory System</p>
-          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
+          {menuItems.map((item) => {
+            const Icon = item.icon
+            const isActive = pathname === item.href
+            
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex items-center space-x-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-green-50 text-green-700"
+                    : "text-gray-700 hover:bg-gray-100"
+                )}
+              >
+                <Icon className="h-5 w-5" />
+                <span>{item.title}</span>
+              </Link>
+            )
+          })}
+
+          {/* Admin Menu */}
+          {userRole === 'administrator' && (
+            <>
+              <div className="pt-4 pb-2">
+                <div className="flex items-center space-x-2 px-3 text-xs font-semibold text-gray-500 uppercase">
+                  <Shield className="h-4 w-4" />
+                  <span>Administration</span>
+                </div>
+              </div>
+              {adminMenuItems.map((item) => {
+                const Icon = item.icon
+                const isActive = pathname === item.href
+                
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      "flex items-center space-x-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                      isActive
+                        ? "bg-green-50 text-green-700"
+                        : "text-gray-700 hover:bg-gray-100"
+                    )}
+                  >
+                    <Icon className="h-5 w-5" />
+                    <span>{item.title}</span>
+                  </Link>
+                )
+              })}
+            </>
+          )}
+        </nav>
+
+        {/* Logout */}
+        <div className="border-t p-4">
+          <Button
+            onClick={handleLogout}
+            variant="ghost"
+            className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+          >
+            <LogOut className="mr-3 h-5 w-5" />
+            Logout
+          </Button>
         </div>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 space-y-1 px-3 py-4">
-        {menuItems.map((item) => {
-          const Icon = item.icon
-          const isActive = pathname === item.href
-          
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center space-x-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-green-50 text-green-700"
-                  : "text-gray-700 hover:bg-gray-100"
-              )}
-            >
-              <Icon className="h-5 w-5" />
-              <span>{item.title}</span>
-            </Link>
-          )
-        })}
-
-        {/* Admin Menu */}
-        {userRole === 'administrator' && (
-          <>
-            <div className="pt-4 pb-2">
-              <div className="flex items-center space-x-2 px-3 text-xs font-semibold text-gray-500 uppercase">
-                <Shield className="h-4 w-4" />
-                <span>Administration</span>
-              </div>
+      {/* Mobile Sidebar */}
+      <div className={cn(
+        "fixed inset-y-0 left-0 z-50 w-64 bg-white border-r transform transition-transform duration-300 ease-in-out lg:hidden",
+        isOpen ? "translate-x-0" : "-translate-x-full"
+      )}>
+        {/* Logo with close button */}
+        <div className="flex h-16 items-center justify-between border-b px-4">
+          <div className="flex items-center space-x-2">
+            <div className="bg-green-600 p-2 rounded-lg">
+              <Warehouse className="h-5 w-5 text-white" />
             </div>
-            {adminMenuItems.map((item) => {
-              const Icon = item.icon
-              const isActive = pathname === item.href
-              
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "flex items-center space-x-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                    isActive
-                      ? "bg-green-50 text-green-700"
-                      : "text-gray-700 hover:bg-gray-100"
-                  )}
-                >
-                  <Icon className="h-5 w-5" />
-                  <span>{item.title}</span>
-                </Link>
-              )
-            })}
-          </>
-        )}
-      </nav>
+            <div>
+              <h1 className="text-base font-bold text-gray-900">Mini Warehouse</h1>
+              <p className="text-xs text-gray-500">Inventory System</p>
+            </div>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="h-8 w-8"
+          >
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
 
-      {/* Logout */}
-      <div className="border-t p-4">
-        <Button
-          onClick={handleLogout}
-          variant="ghost"
-          className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
-        >
-          <LogOut className="mr-3 h-5 w-5" />
-          Logout
-        </Button>
+        {/* Navigation */}
+        <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto h-[calc(100vh-8rem)]">
+          {menuItems.map((item) => {
+            const Icon = item.icon
+            const isActive = pathname === item.href
+            
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={onClose}
+                className={cn(
+                  "flex items-center space-x-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-green-50 text-green-700"
+                    : "text-gray-700 hover:bg-gray-100"
+                )}
+              >
+                <Icon className="h-5 w-5" />
+                <span>{item.title}</span>
+              </Link>
+            )
+          })}
+
+          {/* Admin Menu */}
+          {userRole === 'administrator' && (
+            <>
+              <div className="pt-4 pb-2">
+                <div className="flex items-center space-x-2 px-3 text-xs font-semibold text-gray-500 uppercase">
+                  <Shield className="h-4 w-4" />
+                  <span>Administration</span>
+                </div>
+              </div>
+              {adminMenuItems.map((item) => {
+                const Icon = item.icon
+                const isActive = pathname === item.href
+                
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={onClose}
+                    className={cn(
+                      "flex items-center space-x-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                      isActive
+                        ? "bg-green-50 text-green-700"
+                        : "text-gray-700 hover:bg-gray-100"
+                    )}
+                  >
+                    <Icon className="h-5 w-5" />
+                    <span>{item.title}</span>
+                  </Link>
+                )
+              })}
+            </>
+          )}
+        </nav>
+
+        {/* Logout */}
+        <div className="absolute bottom-0 left-0 right-0 border-t p-4 bg-white">
+          <Button
+            onClick={() => {
+              handleLogout()
+              onClose()
+            }}
+            variant="ghost"
+            className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+          >
+            <LogOut className="mr-3 h-5 w-5" />
+            Logout
+          </Button>
+        </div>
       </div>
-    </div>
+    </>
   )
 }
